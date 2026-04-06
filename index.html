@@ -1160,8 +1160,8 @@ function detectar(){
         const avg = pcts.reduce((a,b) => a+b, 0) / pcts.length;
         const maxDev = Math.max(...pcts.map(p => Math.abs(p - avg)));
         const currentDcto = mrr > 0 ? (mrr - ingresoEfectivo) / mrr : 0;
-        const withinRange = Math.abs(currentDcto - avg) < 0.10;
-        if(maxDev < 0.10 && avg > 0.03 && withinRange) {
+        const withinRange = Math.abs(currentDcto - avg) < 0.02;
+        if(maxDev < 0.02 && avg > 0.03 && withinRange) {
           dctoInfo = {
             pct: Math.round(avg * 100),
             currentPct: Math.round(currentDcto * 100),
