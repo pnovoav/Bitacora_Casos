@@ -161,36 +161,56 @@ table.dt tbody tr.sel td{background:var(--acc3)}
 ::-webkit-scrollbar-thumb:hover{background:#A8ACCF}
 
 /* ── Login overlay ── */
-.login-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
-.login-overlay.hidden{display:none}
-.login-box{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rad-lg);padding:40px 36px;box-shadow:var(--shadow);width:340px;text-align:center}
-.login-box img{height:48px;margin-bottom:8px}
-.login-box h2{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:4px}
-.login-box .login-sub{font-size:11px;color:var(--txt3);margin-bottom:24px;letter-spacing:.05em;text-transform:uppercase;font-weight:600}
-.login-box .fg{margin-bottom:14px;text-align:left}
-.login-box input{width:100%;padding:10px 12px}
-.login-box .btn{width:100%;justify-content:center;padding:10px;margin-top:6px}
-.login-error{color:var(--red);font-size:12px;margin-top:10px;min-height:18px}
+#login-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center}
+#login-overlay::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:48px 48px;opacity:.6;pointer-events:none}
+#login-overlay.hidden{display:none}
+.login-card{position:relative;z-index:1;background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:44px 48px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,.08)}
+.login-logo-wrap{text-align:center;margin-bottom:20px}
+.login-logo-wrap img{height:80px;object-fit:contain;opacity:.95}
+.login-divider{width:40px;height:2px;background:var(--acc);border-radius:2px;margin:0 auto 20px}
+.login-title{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;color:var(--txt);text-align:center;letter-spacing:-.5px;line-height:1.2;margin-bottom:4px}
+.login-subtitle{font-size:10px;color:var(--txt3);text-align:center;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:32px}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.login-field input{width:100%;padding:11px 16px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;color:var(--txt);font-family:'Manrope',sans-serif;font-size:13px;outline:none;transition:border-color .2s,background .2s;letter-spacing:.5px}
+.login-field input::placeholder{color:var(--txt3)}
+.login-field input:focus{border-color:var(--acc2);background:#fff;box-shadow:0 0 0 3px var(--acc3)}
+.login-btn{width:100%;padding:13px;margin-top:8px;background:var(--acc);border:none;border-radius:8px;color:#fff;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .1s}
+.login-btn:hover{background:var(--acc2)}
+.login-btn:active{transform:scale(.98)}
+.login-error{display:none;margin-top:14px;padding:9px 14px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);border-radius:6px;color:var(--red);font-size:11px;text-align:center}
+.login-footer{margin-top:24px;text-align:center;font-size:10px;color:var(--txt3);letter-spacing:1px}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .35s ease}
+@keyframes fadeOut{to{opacity:0;pointer-events:none}}
+.fade-out{animation:fadeOut .5s ease forwards}
 </style>
 </head>
 <body>
 
 <!-- ═══ LOGIN ═══ -->
-<div class="login-overlay" id="login-overlay">
-  <div class="login-box">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAADICAYAAABS39xVAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAABLKADAAQAAAABAAAAyAAAAADOaDBdAAAYj0lEQVR4Ae3dC3wkRYHH8a7uSXZxgeW1gLubBwuyPJPgoqKeeqB3Igqenqin4t3pnXofn4fKY0nCkASU0+P4eHKKd+BH9Hzgeor6OT18AN754sOySWB5wyaT8MoKuLDLwma66/6VB2ST6ZpJZjJ57K8/OzuZruqq6m9PV1dXV/cEARMCCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAlUWMLOZ37HHZmtrtkUNNjSHBEGy0ppg3zAw+wc2WDYxX2sDzTZPmyB53NpwWxgmueHEDN0+0PpAEBg7MS5/I4DAnitQsQrrhEMvWZHUJmuNSeptYE4MrGkJAtso2sNmyBurrrpfldvdSqtbBb3VZOyWTVvae2aYXtUXa67vOkvr8K7A2uGCmRtTEyTB5p6Btk8VDK/SzKaGzvfL922p5axCOfSdifR9GQ6DcKu1ySMmDO7UQeyh4SC+a3Nf9pFKF+HY1dkDMlF0lda5Rmknu6U/sl3sLT0D7W27zZ+HH044rKM5js0l2n5aBx365+1kjLE2CkxwcXeu/dczLWZmpgu65V666pIDn4nybwxt8M7ExKdo1hKrZtToVLZdpIrqSKV1pFbydJeajU3QVNeZ0+fvBCb8dm//BbeOZTbv3tatydbn8/YaVbiaxk0mFdOFmeDUpvrO3/Xm2jZMCq3aR7Vh/1SZnZpaziqUZFTIiEsoRu8jGzwIMkE03FzX8eMkCC+/baD1V5UqytLaYO98PviLguvs8g6DNfp/3ldYcRzWS+u0UZeU71ml0MpMx2q7avN+V8nMuMIKZ1KG4xsvOaq5rvN7z0bxgAnM11SQNyidJTNJa7rLaJ21gYJPG5tsbK7v2NxS3/GB6aZRjfhxPvp6qflofb7mKv9S41c8nrFDFU+zcgnWqAJ7S2jsTWqx/tK1jCqRdDIc5JWOexWebDhQOGC+zY2fnm8l8pVH7ZmnfOHFwqZVYa1b89nlLfWdXwuTWM314K1KfK9iGcxuuDlGpxJXNtd3bmpu6HTlmRdTS33XJ3SQfvU0CvMCtVSvmkb8PTSqPTkTRrc1r7rEtbyZ9kCBkiss9XOcks8P92hHfO88dGpRU/N7avV9fq7LdkJddqVOay6bbjnUUn1zc13XO6a73B4Yf2UQxdc3NmaX7oHrvsevckkV1vF1Xa9WP8cvpNUwr8VM8Em1tn60bt2VriN1TqbERD9VxjPrTDD2P4444gtVObWeE5zKZdqwPI66KpccKVVLQP1tJdU5aeUp2unudv781qGb0hJImf+k5t+v1tjDen9QPW07jAkfU6W3S62PndbYneqoHyl4orEM6lxfpj18qc5v9zGJWR6E9iB1ujao1fFCLduYkkfa7DfFQ49ep8Cxjsi0aJWfr8ryg0r1+DJS3nvvXduu1fJvLiONii+qbeEudOzQ9qjwgeC5q1qutXSwXqVX1iZ4u+LP6dXVikPvAQmqD7poneNjKLpwfmjrl0toLzyjU7IrlNH1SRTldi2JHrz77nPL6lwbL/TI1bZdmUODMHH9FvqSmtPHw9Le3UUA9SOd051r/ae0OJWev67h4hfmbfJlX7q6rPthle0VivPutHiq5M9oqut4Ve9A+/+mxan2/IyNX3vrQPa+2cx33crsQUmm9uA4iI/RUbhT2/moIvnVNR3WubZ3S9vdReLt0cH6PmWD0PzPfEHI5+N7yimLt8I6bmVXncYRvc+XgVpGG2xiPtEz2KqWVOWnjQ9kc0rVvW7W6xtNjV0nmSTRkdX8pS83teQuXbv20i9VquL05eXCVFm5y7W+6d7ugfZ/09XA7+jqamqFNZKAMd/X+0G+xKoZlmQ8V9MqVJCND2X/oKTc6w69Nujizk3a2bwXLkzejfXTOD2mVAGd1fy2p6/1d6kRFljAyGlZWpnDyJ6QFjY2/+HuXNuZs1VZFcq7V/g9ufa3qdX31ULhE+ct3fls18TPs/V3U0OXOzV5pS99ne6+3oXf/OD6x9QsPscXVweBA5vqO/7FF6eaYaGNqn41eOdetW/SOm73r2eyvz+cUBOaFYtJwVthqc/C+0XVEfD6ucLo6W97n/Ie8udvPta8umuVP055oS9enT1Cp3qf86Zig87e/rYt43G6+9sU37qWROok+08cX9+xLjXCIg8YbRnbG3yrqdHwrq+UaQ8S8FZY6s9PH1gnJI21f/lcWum079PK/3G9HtXrkUkvN2+HCeNj9D5rk/rsvudP3N6hW2/aJ8eJjHnb5HmTP+sGy2KnmZMXWVyfrf/7l4+j2xfXCrM2xQS8FVZk7TZvArp1Rn0N17mOcW+8WQrszbVfsy2MV+2fi1cfmVu728vN21G7/MBoxaE3zlL2gcZNna3rXE2+9G1kCg5ovbW/7U61ULO+ZRV2mEbzf6ZInMUbHJo/8azco7cPXtDrCSdoEQp4O93DfNydZCLvamunOyOfj07TPX7Xqu/lFj2ZIRcmSS6qqb1n4wPn+Ss8b8qlBfb1ZZ/pS4t6n/8InbZYKfObDs8eHAzbS71xjWnr3dKa2ims+wcv0lAId2vRyvR0zHm6wfXbs3nTt0mCRH1sqZNuM4pTA2cpoKWu8wIdDNL7X0zgPV2cpWItuGSTJKn6tptNJG+F5a7c6AivoQHG20msAmbUkfwuvb9L/TkaVmUCjYp/WjvjFi37iOY8oE7yoTCxDyWBGQxMsiNIzPYkiHZG1jwThru2582Snbflzn9iNle2kmmb4chdKk73M/Ye9bN1FctTFzZOS2LT7YuXxOEGhb/IFyc9zFVFulbkmRJjtnvqK42+2lWkr9CT+DSC3KDZZbv+eIT7LulrtN6zqIocn+8JJ2hcwJo/jv+5GN5939Pn1k8Vj+snms0rMm6HelavrfrD9T39UZ3Og3pixpA14Vbd6JzT1Y4hmzf3ZpL8E6pIn1acOZvGBoh6x1ypImoptVWk+yAv0zi2f/SvkO3Q1dEL/XGmhr64ofPoOAmu1timJ7SXT6m49AVItNSxeh02denROYrzKy34pF7eLoS05X3zx/KvVdr76G9XKR/ki+/CdP/oGb251h8Vi+cLd7dQ6a6EfsVJOeiYX/TkWl/nS2M+hDXVX/RaE4Q/Ty2LDXrUWBiYjW2XmmeBAG1bDQ62X9V3+BsFgkuelbKxdl8+k4lbdNp3s+bqQXyzMml93AoFdfqjbjQHEUvatdjcu3W7lYbH58PoCVUYGq9jctrXfp3Y8BeVfOzIaN7p/49edbTeykplO3/Tlrae9FR2D1FL7Gy1ZDXswXguEJh27WRXbhrIPrT70v5Pj5t4y3ITrdJOfpJDnsmkLfBqt9xMly8lzyJpuy/BU2qp32DDzHm39a2/q5Q0iSMBEzTr/+YivlWhUuPDbbeyKqySjphu8GYchc06tF1VlTXzZ+JaejoS29dqa7SPPXZki1op31I/2hn+RSsQaqw7PfNNm3Vk/qwvQsEwE7yn4PwJM9UimPYwEtfHp438vgnJLMQ/dQdXcK8OXl+islqIm2+0zDpTUkOjvKmkCstlcfuWCx7V5fm/0wJ/pk6qqzVrR3lZV3Jp26jK9J3q+7jOPTNJLbA3VTL18bRaGjo/rSPWSeOfC73bOD610Pxi83r62zdpHXRLinc6dqQM3ihTAzfl2n6unqybpoYsmDmRmljr9NDGn2rbPqaD09UtdV1vXjClp6AVEyi5whrP0X35ewZa359P4npVEB/RTnajwsquOcfTL//dnqw0fqThFtny03o+hZbGbKPOTnUBwjfZjt4Hs4O+GL6wsfFarg8vdXJlcPfdpUZIC4jtuWlBC2z+AfrO/a1uoP+BKq9r5vLJHAvMbVEUd9oV1vhabx7MPq4R21doJztZY6HqdARfk5jwNJ2mna+d6ptqwm9U3Gn1t4ynXYl3HZEvVKV1eSXScmnYxD9AVPndOZNO8cnlC4PolMnzJn/O15T+NNPxZXsH23+vvzePf14k72flt269h0fyLJStaZaUW9KSOt2LZeL6SRRny9jrJ8/Hz4ZNDVGDLsvvkwnjffS8dz1GRrf7hMky7eBLgyTcT0McVmjI/CF6iPe+6hheqQtZB+qU8wClMf1WxPMZj/ylPD6uBw/+ULfF/HJS0LQ+6jTzPFVZL/YtlDGB92Zs37ITwzbl1t+h+wgvd7fmTJy/2982ONX9wIX6yr6+2/xiH+LorSaT/2vdrO5+4EM8mkw4rFFYb/Sf6po+baddxZKvWLh61uXtLr7UFE/TNi4b3uZOd72n6sXTWbQx3HZ2Y7Fm3DipkEyoRoyrJ8qalMb8m16++rK9dmae1BXJmv0Saw/XvnWQKrUVauZoIKE5TiV+qV57l1Zye5daPkeXFndqrLHL3w9ODXl+jiqXcyv9KBud7rjxM8ufz2XKX0/amvhFvfdnh6aETHNGU13Xeh0oLk5bzLWeJ94LmRavkvOPO+ziQ6Ikr6um0St1MPsHpb3Sl74eq/bn3bkLf+aLMzFsjxnWYOxH8ybZUBvPbYWl38up3blkr8fKfXpKRVpYE78Ilfj7t4Nn71Q6fWNpdU9OU/1J++n3C9+qFttfqcZ93eTw3T+bo05Y3fGaTYPt7ig87Sk20XVFavVfV7qycoXUQI43qsX5f54C76vBq99SuK6WljeZMHGt2vISqfDS7iKPknSvG9Rn9+U4E/1OTYXD07LR8yDfq7CSK6y0dBbdfGv6NvdX/mfS5srJW2G5XyipyYwMLJxSvtrh2sg9KmVKQBVmdPdlXevDXam8uljrwBUnCcOX623aFZb7RR7tJCe6NNKm0MZvTwsrZ7777Tad9n1Fp0Yf8KRzinsOvC6CfMcTp+wgfUncGLk5m9wdFy2rO9+gNsI9nkKc7n64d/PmbPVOXT2FmS9B+jVAXyt9vhSz5HJ4z2v1CyVD6mweKPTSQ+hy+r24D5Wc0yxF7B1ovURJD3iTn8FjWd0piVo4V3rTteaT0x3I6U1vUqD6qD6oWYOTZu/+0dhv7z5jcX7qHmy7V2v2sGftlkdP1hzpCSdoEQh4KyytX6SX6ysq9HqB+pXSO4ariKOTmbL7cSYXN4qtO93yTberZXOZL0IlwvTMp7OKpeMGzRaLszjCjbt9K3VSP9x+qYEELAoBb4WlcVbFdoS182EAn7pf6n1bw1rrrpKUPKnD+6M6FTvZu0BiZjRA1JtmgcDuvrYb1aOlU0PPpEGzzXUXvd4TY8EHnRlcq4OnPdS3IsWe3+ZblrCFIeCtsLQK3yi2GhrA919NqzursvMWKot+i/CLGkiY/hgSLaQW2G2Fli00zw0Q1fzLC4WNz1O/1vpqPha6J5d3V8m2jedf8N2E32w65HPLCoYtgpn3NtzVodVY6l0Va10nfUUm3bfohgMs+CnRo4MW/EpMWAFvhbVff3y99vatE+IX+jPUactPWuo6/tv9fmGhCLMxz1WSagn9XuX7cJH0/6CH+00YG1YkdhJtUAyfy616jtVniqRS4eCsvnfu3knvdIBZ8uwXvTFmGFhTE3uHdcww2ZIWcy0rHZQ6dEV4fZEFHu7tb+0rEqfkYB3kyh4zVHJmsxgxMrbY/juLuVc+aW0X/6SnE7xUT0n4vT/WbqH9+pRT832T2jZ3qDK72yTRUD4wDyf7PLtjOldxdDn7BcMmOCDMZOqtTdbo0nuLmv0n6iEpa5SHG1hYdFLH+cf1KJIvFI2oCO6nwXRkvdQTNx/nzZrbH2r1d/J7EignqKm+8yvaYH/vS0NP4nvNdJ9e0dzQ8c+yPTstXTU1zlT/0P3J2G9JpsUrd75GFiY6ea/V92Z/Xd06RoNb3WDQV+i1qmja+lGSsef8F43qIhQfhzXSL3qDorp9pOh+4tKsxKSM9PXWE+XC5FO6Gt5XLM2ij5cxgdt3t+gsxPVHz/Fkl2rlfup+PWqmBfEOa3CJ6tTnZrVk3E58bomZNCieXuZVLr57LIzVQFs1WZ4xT0U7dKl+m77827UT7FTAWEvGbFesJYpeo/nuy7FMYcvyJthPH/ZVH5RmuU2pf+7PEidFvz+zYsWXRn4krMgyI19gf2Xlhip9aK4qK1d8tew+oG3xBv25Om119PSKaxTWmBY+k/ly/K5b+bGNNZMkSlvGbfznMpnGhlbqKqNrGVdyOliJvaOSCZaS1uhau18Xznxe8ftKWcYbxwYvU7h7zYNJowvNyI/lzrjCeu7r4VubnlzbeQr/T1+cEsKW6kt1oCqmNap/mlQhOcSXjL5GOrjdkfQlinOiXkerw991pO+r10yn4XzenLxx4weHS0nAmuiHvnj6Iv1co72v8sWpRph26LOK5NNQyXsoi+Q1X4IHo4MO/tl8KUwlyqEfIFkUp6RTLcxDU+eVPqekCsslp0rrPeqH7Co96TmN2R8l8TGltoZ0SvQRVUjrfCUOw/hMX3i1wkavGgZf9+Wndfm4e9KoL85iCtO2LvnAtJjWe09cl5IrLIfTM9Depmexv0w7xG/nK5bK9jk9PeKoWwdL+2n1Yxuzh6qd+q9F1uf0sdH1RaJVJ7gnF/+NToL6fLnFdo+4TeVxm9iTSt3WPi/CFobAtCost0quT0t9Ka9QX9JbxsZpqY6Y82lIp5idOt08TmU7Z+zpESUVKpNE13ojWvt9tS5/7I1T9cCsHs8evLtItqsq/UywIvlVM3ib+kIu1s3fR489NqeaeZPXHAoU7XRPK1v3QNsPFPaDplXZc8IoPE2XnZv0JVqreSeM9lWlLVmR+dtVQd2inbZHV1Ru2RYmG6ZTSY2XQFcF/13Lj1wcGJ836T3ZfyCZlXsFJ+Uz7Y/d/a2/0amsfrzCe3XvwuaGrp6e/tbv+zLQ0yZeOB+OOp4yPqGwzWOvTeqQvva2/jJ/YSmTqQliO+Pvv6esFQnSMBb/mLOxXEIb7a2xkBXJsxqJaH9LvWBUSv5lb7CxJ2w+NxK7sTG7dH8TrtWvoR2vIQX6UQlzpHvWlW7j0aBG667+ZXRJx20Ml7fqNncZe3xSFRSMjErfpT92aTPoVgyzQ7cvP6kd8xF1ON+ZJLa3pqa2tyK/eWiTTSrXx3TpseAW15Xg39wYtOXHSzff3vVY5U+q0tqSWq4krNXwgF2p4eMB1l6hLfGb8Y9z/e6e16UryU/pe7NVdcrDS5Lh+yr9S0nx00v+ENbu/LCGyUz7LKMaPjW74vtKySdJ8htNJtSdGQtksvbOBVJSiokAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggMC8Fvh/RyyDhnoOHwgAAAAASUVORK5CYII=" alt="Sable" style="height:132px;">
-    <h2 style="font-size:22px">Bitácora de Casos</h2>
-    <div class="login-sub">Iniciar sesión</div>
-    <div class="fg">
+<div id="login-overlay">
+  <div class="login-card" id="loginCard">
+    <div class="login-logo-wrap">
+      <img src="data:image/png;base64,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" alt="Sable ERP" onerror="this.style.display='none'">
+    </div>
+    <div class="login-divider"></div>
+    <div class="login-title">Bitácora de Casos</div>
+    <div class="login-subtitle">Sable ERP · Acceso Seguro</div>
+
+    <div class="login-field">
       <label>Usuario</label>
-      <input type="text" id="login-user" placeholder="Usuario" autofocus>
+      <input type="text" id="login-user" placeholder="Ingresa tu usuario" autocomplete="username" autofocus onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div class="fg">
+    <div class="login-field">
       <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="login-pass" placeholder="Ingresa tu contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
-    <div class="login-error" id="login-error"></div>
+
+    <button class="login-btn" onclick="doLogin()">Ingresar →</button>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+
+    <div class="login-footer">PCGA · CLP · Multi-ERP</div>
   </div>
 </div>
 
@@ -291,17 +311,14 @@ table.dt tbody tr.sel td{background:var(--acc3)}
       </div>
       <span style="font-size:12px;color:var(--txt3)">Haz click en una fila para anotar</span>
     </div>
-    <div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--txt3)">
-      <span>Anticipados: <span style="color:var(--grn);font-weight:600">■</span> Excel &nbsp; <span style="color:var(--amb);font-weight:600">■</span> ~Inferido</span>
-    </div>
     <div class="table-wrap">
       <table class="dt">
         <thead><tr>
           <th>RUT</th><th>Cliente</th>
           <th style="text-align:right">MRR</th>
           <th style="text-align:right">Factura</th>
-          <th style="text-align:right" title="Verde = dato Excel · Ámbar (~) = inferido">Cobrado mes</th>
-          <th style="text-align:right" title="Verde = dato Excel · Ámbar (~) = inferido">Reconocido mes</th>
+          <th style="text-align:right">Cobrado mes</th>
+          <th style="text-align:right">Reconocido mes</th>
           <th style="text-align:right">Ingreso efectivo</th>
           <th style="text-align:right">Dif. ajustada</th>
           <th style="text-align:right">% MRR</th>
@@ -1059,35 +1076,6 @@ function detectar(){
     console.log('Muestra reconocido:', Object.entries(reconocidoMap).slice(0,3));
   }
 
-  // ── Mapa completo Excel por mes (backup para inferencia) ──
-  const fullExcelRecMap={};
-  if(antDataRaw&&antDataRaw.length>1){
-    for(let i=1;i<antDataRaw.length;i++){
-      const row=antDataRaw[i];
-      if(!row[2]) continue;
-      const rv=normRut(String(row[2]).trim());
-      if(!rv) continue;
-      const subfam=String(row[13]||'').trim().toLowerCase();
-      const erpAnt=SUBFAM_ERP[subfam];
-      if(!erpAnt) continue;
-      const netoProd=pNum(row[14]);
-      const nMeses=pNum(row[27]);
-      if(!netoProd||!nMeses) continue;
-      let fd=row[4];
-      if(!fd) continue;
-      if(!(fd instanceof Date)) fd=new Date(String(fd));
-      if(isNaN(fd.getTime())) continue;
-      const key=rv+'|'+erpAnt;
-      const recM=Math.round(netoProd/nMeses);
-      for(let m=0;m<nMeses;m++){
-        const d=new Date(fd.getFullYear(),fd.getMonth()+m,1);
-        const ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-        if(!fullExcelRecMap[key]) fullExcelRecMap[key]={};
-        fullExcelRecMap[key][ym]=(fullExcelRecMap[key][ym]||0)+recM;
-      }
-    }
-  }
-
   let rows=mrrData.filter(r=>{
     const rMes=normDate(r[cols.mes]);
     if(rMes!==mes) return false;
@@ -1133,67 +1121,6 @@ function detectar(){
     });
   }
 
-  // ── Inferencia de anticipados faltantes ──
-  // Backup a la metodología original: solo actúa sobre el exceso no cubierto por el Excel
-  const INFERER_TOL=0.08;
-  const inferidoCobMap={}, inferidoRecMap={};
-  if(cols.mrr&&cols.fact&&cols.rut&&cols.mes){
-    // Agrupar mrrData por clave, deduplicar por mes
-    const clientMths={};
-    mrrData.forEach(r=>{
-      const rMes=normDate(r[cols.mes]);
-      if(!rMes) return;
-      const rv=normRut(String(r[cols.rut]||'').trim());
-      const erpV=cols.erp?String(r[cols.erp]||'').trim():'';
-      if(!['Manager+','Flexline','Time'].includes(erpV)) return;
-      const key=rv+'|'+erpV;
-      const mrrV=pNum(r[cols.mrr]||0);
-      const factV=pNum(r[cols.fact]||0);
-      if(!mrrV) return;
-      if(!clientMths[key]) clientMths[key]=[];
-      if(!clientMths[key].find(x=>x.mes===rMes)) clientMths[key].push({mes:rMes,mrr:mrrV,fact:factV});
-    });
-    Object.entries(clientMths).forEach(([key,months])=>{
-      months.sort((a,b)=>a.mes>b.mes?1:-1);
-      months.forEach((m,idx)=>{
-        if(!m.mrr||m.fact<=m.mrr*1.5) return; // no es factura grande
-        // fact_ref: mes siguiente o anterior con fact > 0
-        const sig=months[idx+1];
-        const ant=months[idx-1];
-        const fact_ref=(sig&&sig.fact>0)?sig.fact:(ant&&ant.fact>0)?ant.fact:0;
-        // reconocido ya existente para este mes (Excel + inferidos previos acumulados)
-        const rec_excel=(fullExcelRecMap[key]&&fullExcelRecMap[key][m.mes])||0;
-        const rec_inf=(inferidoRecMap[key]&&inferidoRecMap[key][m.mes])||0;
-        const rec_exist=rec_excel+rec_inf;
-        // exceso no explicado por fact_ref
-        const exceso=m.fact-fact_ref;
-        if(exceso<=0) return;
-        // Probar N=3,6,12 — busca el que cumple (exceso/N)+rec_exist ≈ MRR
-        let bestN=null,bestDiff=999;
-        for(const n of [3,6,12]){
-          const rec_n=exceso/n;
-          const ing=fact_ref+rec_n+rec_exist;
-          const diff=Math.abs(ing-m.mrr)/m.mrr;
-          if(diff<bestDiff){bestDiff=diff;bestN=n;}
-        }
-        if(bestDiff>INFERER_TOL||!bestN) return;
-        const rec_n=Math.round(exceso/bestN);
-        // Registrar cobrado para el mes de la factura grande
-        if(!inferidoCobMap[key]) inferidoCobMap[key]={};
-        inferidoCobMap[key][m.mes]=(inferidoCobMap[key][m.mes]||0)+exceso;
-        // Registrar reconocido para los N meses siguientes
-        const [by,bmo]=m.mes.split('-').map(Number);
-        for(let i=0;i<bestN;i++){
-          const d=new Date(by,bmo-1+i,1);
-          const ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-          if(!inferidoRecMap[key]) inferidoRecMap[key]={};
-          inferidoRecMap[key][ym]=(inferidoRecMap[key][ym]||0)+rec_n;
-        }
-        console.log(`Anticipo inferido [${key}] mes=${m.mes} N=${bestN} rec=${rec_n}/mes diff=${(bestDiff*100).toFixed(1)}%`);
-      });
-    });
-  }
-
   const casos=[];
   rows.forEach(r=>{
     const erpVal=cols.erp?String(r[cols.erp]||'').trim():(erp||'?');
@@ -1210,12 +1137,8 @@ function detectar(){
     // Ingreso efectivo = factura - cobrado_en_mes + reconocido_en_mes
     // cobrado_en_mes: monto del anticipado facturado este mismo mes (sacar de factura)
     // reconocido_en_mes: porción que le corresponde a este mes de facturas anticipadas vigentes
-    const cobExcel=(cobradoMap[antKey]||0);
-    const cobInferido=((inferidoCobMap[antKey]&&inferidoCobMap[antKey][mes])||0);
-    const cobrado=cobExcel+cobInferido;
-    const recExcel=(reconocidoMap[antKey]||0);
-    const recInferido=((inferidoRecMap[antKey]&&inferidoRecMap[antKey][mes])||0);
-    const reconocido=recExcel+recInferido;
+    const cobrado=(cobradoMap[antKey]||0);
+    const reconocido=(reconocidoMap[antKey]||0);
     const ingresoEfectivo=fact - cobrado + reconocido;
 
     const diffAjustada = ingresoEfectivo - mrr;
@@ -1250,7 +1173,7 @@ function detectar(){
       }
     }
 
-    casos.push({erpVal,rutVal,cliVal,mrr,fact,cobrado,reconocido,cobExcel,cobInferido,recExcel,recInferido,ingresoEfectivo,diff:diffAjustada,diffAjustada,pct,mes,expAnterior,expAnteriorDetallada,dctoInfo});
+    casos.push({erpVal,rutVal,cliVal,mrr,fact,cobrado,reconocido,ingresoEfectivo,diff:diffAjustada,diffAjustada,pct,mes,expAnterior,expAnteriorDetallada,dctoInfo});
   });
 
   currentCasos=casos;
@@ -1274,8 +1197,8 @@ function renderRevision(casos,erp,mes){
       <td style="min-width:160px;word-break:break-word">${esc(c.cliVal)}</td>
       <td class="num">${fmt(c.mrr)}</td>
       <td class="num ${c.fact===0?'muted':''}">${c.fact===0?'—':fmt(c.fact)}</td>
-      <td class="num">${fmtAnt(c.cobExcel,c.cobInferido)}</td>
-      <td class="num">${fmtAnt(c.recExcel,c.recInferido)}</td>
+      <td class="num ${c.cobrado?'':'muted'}">${c.cobrado?'<span style="color:var(--grn)" title="Dato de anticipados (Excel)">'+fmt(c.cobrado)+'</span>':'—'}</td>
+      <td class="num ${c.reconocido?'':'muted'}">${c.reconocido?'<span style="color:var(--grn)" title="Dato de anticipados (Excel)">'+fmt(c.reconocido)+'</span>':'—'}</td>
       <td class="num" style="font-weight:600">${fmt(c.ingresoEfectivo)}</td>
       <td class="num ${c.diffAjustada<0?'neg':c.diffAjustada>0?'pos':''}">${fmt(c.diffAjustada)}</td>
       <td class="num ${c.diffAjustada<0?'neg':c.diffAjustada>0?'pos':''}" style="font-size:12px">${c.mrr?((c.diffAjustada/c.mrr*100).toFixed(1)+'%'):'—'}</td>
@@ -1538,25 +1461,6 @@ function switchTab(btn){
 function fmt(n){
   if(n===null||n===undefined||n==='') return '—';
   return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
-}
-
-// Formatea cobrado/reconocido mostrando fuente: verde=Excel, ámbar=inferido
-function fmtAnt(excel, inferido){
-  const total = (excel||0) + (inferido||0);
-  if(!total) return '<span class="muted">—</span>';
-  if(excel && !inferido){
-    // 100% del Excel
-    return '<span style="color:var(--grn)" title="Dato de anticipados (Excel)">' + fmt(total) + '</span>';
-  }
-  if(!excel && inferido){
-    // 100% inferido
-    return '<span style="color:var(--amb)" title="Inferido por heurística">~' + fmt(total) + '</span>';
-  }
-  // Mixto: parte Excel + parte inferida
-  return '<span title="Excel: '+fmt(excel)+' + Inferido: '+fmt(inferido)+'">'
-    + '<span style="color:var(--grn)">' + fmt(excel) + '</span>'
-    + '<span style="color:var(--amb);font-size:10px"> +~' + fmt(inferido) + '</span>'
-    + '</span>';
 }
 
 function fmtMes(m){
@@ -1825,9 +1729,16 @@ async function doLogin(){
   const user = document.getElementById('login-user').value.trim();
   const pass = document.getElementById('login-pass').value.trim();
   const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
+  const card = document.getElementById('loginCard');
+  errEl.style.display = 'none';
 
-  if(!user || !pass){ errEl.textContent = 'Ingresa usuario y contraseña'; return; }
+  if(!user || !pass){
+    errEl.textContent = 'Ingresa usuario y contraseña';
+    errEl.style.display = 'block';
+    card.classList.add('shake');
+    setTimeout(()=>card.classList.remove('shake'),400);
+    return;
+  }
 
   try {
     const res = await fetch(WORKER_URL + '/login', {
@@ -1838,17 +1749,26 @@ async function doLogin(){
     const data = await res.json();
     if(data.ok){
       _loggedUser = data.user;
-      document.getElementById('login-overlay').classList.add('hidden');
+      // Fade out login overlay
+      const overlay = document.getElementById('login-overlay');
+      overlay.classList.add('fade-out');
+      setTimeout(()=>{ overlay.style.display='none'; },500);
       // Mostrar el nombre del usuario en el header
       const userSpan = document.getElementById('user-display');
       if(userSpan) userSpan.textContent = _loggedUser;
       // Iniciar la app
       startApp();
     } else {
-      errEl.textContent = data.error || 'Credenciales incorrectas';
+      errEl.textContent = data.error || 'Usuario o contraseña incorrectos';
+      errEl.style.display = 'block';
+      card.classList.add('shake');
+      setTimeout(()=>card.classList.remove('shake'),400);
     }
   } catch(e){
     errEl.textContent = 'Error de conexión: ' + e.message;
+    errEl.style.display = 'block';
+    card.classList.add('shake');
+    setTimeout(()=>card.classList.remove('shake'),400);
     console.error('Login error:', e);
   }
 }
