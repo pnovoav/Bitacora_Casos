@@ -128,6 +128,60 @@ table.dt tbody tr.sel td{background:var(--acc3)}
 .fade-out{animation:fadeOut .5s ease forwards}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:#C8CCE0;border-radius:3px}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1024px){
+  main{padding:20px 18px}
+  header{padding:0 18px}
+  nav{padding:0 18px;overflow-x:auto;white-space:nowrap}
+  .ann-inner{grid-template-columns:1fr !important}
+}
+@media (max-width:768px){
+  body{font-size:13px}
+  header{height:auto;padding:10px 14px;flex-wrap:wrap;gap:8px}
+  .header-center{display:none}
+  .header-right{font-size:11px;gap:6px;flex-wrap:wrap}
+  nav{padding:0 8px;gap:0}
+  .tab-btn{padding:12px 12px;font-size:12px}
+  .tab-btn svg{width:13px;height:13px}
+  main{padding:14px 12px;max-width:100%}
+  .card{padding:16px 14px;margin-bottom:12px;border-radius:var(--rad)}
+  .card-title{font-size:10px;margin-bottom:12px}
+  .form-row{gap:10px;flex-direction:column;align-items:stretch}
+  .form-row .fg{width:100%}
+  select,input[type=text],input[type=number]{width:100%;font-size:14px}
+  select{min-width:0}
+  .upload-zone{font-size:12px;padding:10px 12px}
+  .btn{padding:10px 16px;font-size:13px}
+  .btn-sm{padding:6px 10px;font-size:11px}
+  table.dt{font-size:12px}
+  table.dt th,table.dt td{padding:8px 10px}
+  table.dt th{font-size:9.5px}
+  .num{font-size:11px}
+  .stats-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+  .stat-card{padding:14px}
+  .stat-val{font-size:22px}
+  .stat-lbl{font-size:9.5px}
+  .ann-inner{grid-template-columns:1fr !important;padding:14px 12px;gap:12px}
+  .ann-inner .fg[style*="padding-top"]{padding-top:0 !important}
+  .ann-inner > div:last-child{flex-direction:row !important;padding-top:0 !important}
+  .ann-inner > div:last-child .btn{flex:1}
+  .ai-fab{width:48px;height:48px;bottom:16px;right:16px;border-radius:12px}
+  .ai-fab svg{width:22px;height:22px}
+  .ai-panel{width:calc(100vw - 24px);right:12px;left:12px;bottom:74px;max-height:70vh}
+  .toast{right:12px;left:12px;bottom:16px;font-size:12px;padding:10px 14px}
+  .login-card{padding:32px 24px;margin:14px;max-width:none}
+  .login-title{font-size:18px}
+  .breadcrumb{font-size:12px;flex-wrap:wrap}
+}
+@media (max-width:480px){
+  .logo img{height:26px !important}
+  .tab-btn{padding:10px 8px;font-size:11px;gap:4px}
+  .tab-btn svg{display:none}
+  .header-right .db-pill{font-size:10px;padding:2px 8px}
+  table.dt th,table.dt td{padding:6px 8px;font-size:11px}
+  .stat-val{font-size:19px}
+}
 </style>
 </head>
 <body>
@@ -200,6 +254,14 @@ table.dt tbody tr.sel td{background:var(--acc3)}
           <span id="lbl-ant">Cargar ingresos_anticipados.xlsx</span>
         </div>
         <input type="file" id="f-ant" accept=".xlsx,.xls" onchange="handleUpload(event,'ant')">
+      </div>
+      <div class="fg">
+        <label>Base de Contratos</label>
+        <div class="upload-zone" onclick="document.getElementById('f-contratos').click()">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span id="lbl-contratos">Cargar contratos_erp.xlsx (opcional)</span>
+        </div>
+        <input type="file" id="f-contratos" accept=".xlsx,.xls" onchange="handleUpload(event,'contratos')">
       </div>
       <div class="fg">
         <label>Tolerancia %</label>
@@ -571,7 +633,9 @@ const TIPOS_CASO=[
 "Cliente cancela antes de fecha de término contractual","Descuento aplicado sobre tarifa contractual",
 "Upselling acordado aún no reflejado en facturación","Downselling acordado aún no reflejado en facturación",
 "Facturación de más de un mes emitida en un mismo período","Facturación mixta (anual + anticipado)",
-"Facturación semestral","Facturación anual"
+"Facturación semestral","Facturación anual",
+"Diferencia explicada por contratos comprometidos/ingresados (C/I)",
+"Pago anticipado detectado en período anterior (no registrado en archivo de anticipados)"
 ];
 
 /* ── DB LOCAL + GIST ── */
@@ -598,7 +662,7 @@ function isRegistered(erp,rut,mes){return getDB().some(c=>c.erp===erp&&c.rut===r
 function refreshPill(){const n=getDB().length;document.getElementById('db-pill').textContent=n+' caso'+(n!==1?'s':'');}
 function syncStatus(msg,isError=false){let el=document.getElementById('sync-status');if(!el)return;el.textContent=msg;el.style.color=isError?'var(--red)':'var(--grn)';}
 
-let mrrData=[],antData=[],antDataRaw=[],currentCasos=[];
+let mrrData=[],antData=[],antDataRaw=[],currentCasos=[],contratosData=[],ufMesMap={};
 
 /* ── FILE PARSING ── */
 function parseXLSX(file,cb){const r=new FileReader();r.onload=e=>{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});const sn=wb.SheetNames.find(n=>n.toLowerCase().includes('mrr')||n.toLowerCase().includes('activo')||n.toLowerCase().includes('antic')||n.toLowerCase().includes('long'))||wb.SheetNames[0];const ws=wb.Sheets[sn];const data=XLSX.utils.sheet_to_json(ws,{defval:''});const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});cb(data,raw,file.name,sn);};r.readAsArrayBuffer(file);}
@@ -616,11 +680,16 @@ function handleUpload(e,type){
       document.querySelectorAll('.upload-zone')[0].classList.add('loaded');populateMeses();
       toast('Cargado — subiendo al Gist…','success');
       gistSaveData(GIST_ID_DATA,GIST_FILE_MRR,{data,raw}).then(ok=>{syncStatus(ok?'✓ MRR guardado':'⚠ Error MRR',!ok);toast(ok?'MRR en Gist ✓':'Error guardando MRR',ok?'success':'error');});
-    }else{
+    }else if(type==='ant'){
       antData=data;antDataRaw=raw;document.getElementById('lbl-ant').textContent='✓ '+name+' ('+data.length+' filas)';
       document.querySelectorAll('.upload-zone')[1].classList.add('loaded');
       toast('Cargado — subiendo al Gist…','success');
       gistSaveData(GIST_ID_DATA,GIST_FILE_ANT,{data,raw}).then(ok=>{syncStatus(ok?'✓ Anticipados guardados':'⚠ Error anticipados',!ok);});
+    }else if(type==='contratos'){
+      contratosData=data;
+      document.getElementById('lbl-contratos').textContent='✓ '+name+' ('+data.length+' líneas)';
+      document.querySelectorAll('.upload-zone')[2].classList.add('loaded');
+      toast('Base de contratos cargada — '+data.length+' líneas ✓','success');
     }
   });
 }
@@ -629,12 +698,88 @@ function populateMeses(){
   if(!mrrData.length)return;
   const mesCol=findCol(mrrData[0],['mes','periodo','fecha','month']);
   if(!mesCol){toast('⚠ No se encontró columna de mes','error');return;}
+  const ufCol=findCol(mrrData[0],['uf_prom_mes','uf_prom','uf_mes','uf']);
+  if(ufCol){mrrData.forEach(r=>{const m=normDate(r[mesCol]);if(m&&!ufMesMap[m]&&r[ufCol])ufMesMap[m]=pNum(r[ufCol]);});}
   const meses=[...new Set(mrrData.map(r=>normDate(r[mesCol])).filter(m=>/^\d{4}-\d{2}$/.test(m)))].sort().reverse();
   if(!meses.length){toast('⚠ No se pudieron extraer fechas','error');return;}
   const sel=document.getElementById('r-mes');
   sel.innerHTML=meses.map(m=>`<option value="${m}">${fmtMes(m)}</option>`).join('');
   const esel=document.getElementById('e-mes');
   esel.innerHTML='<option value="">Todos</option>'+meses.map(m=>`<option value="${m}">${fmtMes(m)}</option>`).join('');
+}
+
+/* ── CI EXPLAIN ── */
+function calcCIExplain(rutVal,erpVal,mes){
+  if(!contratosData.length)return null;
+  const uf=ufMesMap[mes]||0;
+  const row0=contratosData[0];
+  const colR=findCol(row0,['rut','rut_cliente','id_cliente']);
+  const colSub=findCol(row0,['subfamilia','sub_familia','erp']);
+  const colMonto=findCol(row0,['monto_neto','monto']);
+  const colMoneda=findCol(row0,['moneda']);
+  const colTasa=findCol(row0,['tasa_cambio','tasa']);
+  const colEstado=findCol(row0,['estado']);
+  const colPeriod=findCol(row0,['periodicidad']);
+  if(!colR||!colMonto||!colEstado)return null;
+  const rutNorm=normRut(rutVal);
+  const erpNorm=norm(erpVal||'');
+  const lines=contratosData.filter(r=>{
+    if(normRut(String(r[colR]||''))!==rutNorm)return false;
+    const est=String(r[colEstado]||'').trim().toUpperCase();
+    if(!['C','I'].includes(est))return false;
+    if(colSub&&erpVal){const sub=norm(String(r[colSub]||''));if(sub&&erpNorm&&!sub.includes(erpNorm)&&!erpNorm.includes(sub))return false;}
+    return true;
+  });
+  if(!lines.length)return null;
+  let total=0;const detail=[];
+  lines.forEach(r=>{
+    const monto=pNum(r[colMonto]);
+    const moneda=String(r[colMoneda]||'CLP').trim().toUpperCase();
+    const tasa=pNum(r[colTasa]||1);
+    const period=pNum(r[colPeriod]||1)||1;
+    let clp=monto/period;
+    if(moneda==='UF'&&tasa>0&&uf>0)clp=(monto/tasa)*uf/period;
+    else if(moneda==='USD'&&tasa>0)clp=(monto/tasa)/period;
+    total+=clp;
+    detail.push({monto,moneda,clp:Math.round(clp),estado:String(r[colEstado]||'')});
+  });
+  return{total:Math.round(total),lines:lines.length,detail};
+}
+
+/* ── ANTICIPO HISTORICO EN MRR ── */
+function calcAnticipoMRR(rutVal,erpVal,mes,mrrActual,cols){
+  if(!mrrData.length||!mrrActual)return null;
+  const rutNorm=normRut(rutVal);
+  const [cy,cm]=mes.split('-').map(Number);
+  const curIdx=cy*12+(cm-1);
+  const candidates=[];
+  mrrData.forEach(r=>{
+    const rMes=normDate(r[cols.mes]);if(!rMes||rMes>=mes)return;
+    const rRut=normRut(String(r[cols.rut]||''));if(rRut!==rutNorm)return;
+    const rErp=cols.erp?String(r[cols.erp]||'').trim():'';if(erpVal&&rErp!==erpVal)return;
+    const fact=pNum(r[cols.fact]||0);if(fact<=0)return;
+    candidates.push({mes:rMes,fact});
+  });
+  if(!candidates.length)return null;
+  candidates.sort((a,b)=>b.mes>a.mes?1:-1);
+  const TOL=0.07;
+  for(const cand of candidates){
+    const [py,pm]=cand.mes.split('-').map(Number);
+    const pIdx=py*12+(pm-1);
+    const monthsBack=curIdx-pIdx;if(monthsBack<=0||monthsBack>12)continue;
+    for(const N of [12,6,3]){
+      if(N<=monthsBack)continue;
+      const expected=mrrActual*N;
+      const dev=Math.abs(cand.fact-expected)/expected;
+      if(dev<=TOL){
+        const endIdx=pIdx+N-1;
+        const endY=Math.floor(endIdx/12),endM=(endIdx%12)+1;
+        const mesFin=String(endY)+'-'+String(endM).padStart(2,'0');
+        return{mesPago:cand.mes,montoPago:Math.round(cand.fact),nMeses:N,mensual:Math.round(cand.fact/N),mesFin,dev:Math.round(dev*100)};
+      }
+    }
+  }
+  return null;
 }
 
 /* ── DETECTION ── */
@@ -718,7 +863,10 @@ function detectar(){
       const hist=(dctoHistMap[antKey]||[]).sort((a,b)=>b.mes>a.mes?1:-1).slice(0,3);
       if(hist.length>=2){const pcts=hist.map(d=>d.dpct);const avg=pcts.reduce((a,b)=>a+b,0)/pcts.length;const maxDev=Math.max(...pcts.map(p=>Math.abs(p-avg)));const currentDcto=mrr>0?(mrr-ingresoEfectivo)/mrr:0;const withinRange=Math.abs(currentDcto-avg)<0.02;if(maxDev<0.02&&avg>0.03&&withinRange)dctoInfo={pct:Math.round(avg*100),currentPct:Math.round(currentDcto*100),mrrOrig:mrr,factReal:ingresoEfectivo,nMeses:hist.length};}
     }
-    casos.push({erpVal,rutVal,cliVal,mrr,fact,cobrado,reconocido,ingresoEfectivo,diff:diffAjustada,diffAjustada,pct,mes,expAnterior,expAnteriorDetallada,dctoInfo});
+    const ciExplain=calcCIExplain(rutVal,erpVal,mes);
+    let anticipoMRR=null;
+    if(diffAjustada<0)anticipoMRR=calcAnticipoMRR(rutVal,erpVal,mes,mrr,cols);
+    casos.push({erpVal,rutVal,cliVal,mrr,fact,cobrado,reconocido,ingresoEfectivo,diff:diffAjustada,diffAjustada,pct,mes,expAnterior,expAnteriorDetallada,dctoInfo,ciExplain,anticipoMRR});
   });
   currentCasos=casos;renderRevision(casos,erp,mes);
 }
@@ -743,6 +891,8 @@ function renderRevision(casos,erp,mes){
       <td style="max-width:440px;font-size:11px;word-break:break-word">${c.expAnterior?'<div style="color:var(--acc);font-weight:600">'+esc(c.expAnterior)+'</div>'+(c.expAnteriorDetallada?'<div style="color:var(--txt3);margin-top:2px">'+esc(c.expAnteriorDetallada)+'</div>':''):'<span style="opacity:.4">Sin historial</span>'}</td>
       <td style="white-space:nowrap;text-align:right">
         ${c.dctoInfo?`<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-bottom:5px;display:block;width:100%;border-color:var(--amb);color:var(--amb)" onclick="aplicarDcto(${i},event)">⚡ Dcto ~${c.dctoInfo.pct}%</button>`:''}
+        ${c.ciExplain&&(Math.abs(c.ciExplain.total)/Math.abs(c.diffAjustada||1))>=0.15?`<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-bottom:5px;display:block;width:100%;border-color:var(--grn);color:var(--grn)" onclick="aplicarCI(${i},event)">📋 Contrato C/I (~${fmt(c.ciExplain.total)})</button>`:''}
+        ${c.anticipoMRR?`<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-bottom:5px;display:block;width:100%;border-color:var(--acc2);color:var(--acc2)" onclick="aplicarAnticipo(${i},event)">💰 Pago anticipado ${fmtMes(c.anticipoMRR.mesPago)} (${c.anticipoMRR.nMeses}x MRR)</button>`:''}
         <span style="color:var(--acc2);font-size:12px">Anotar →</span>
       </td>
     </tr>
@@ -807,13 +957,17 @@ function renderHistorial(){
   tb.innerHTML=sorted.map(g=>{const pend=g.cases.some(c=>c.estado==='pendiente');return `<tr onclick="showL2('${esc(g.erp)}','${g.mes}')" style="cursor:pointer"><td><span class="pill-erp">${g.erp||'—'}</span></td><td style="font-weight:600">${fmtMes(g.mes)}</td><td><span class="mono">${g.cases.length}</span></td><td>${pend?'<span class="badge b-amb">Pendiente</span>':'<span class="badge b-grn">Explicado</span>'}</td><td style="color:var(--txt3);font-size:12px">Ver →</td></tr>`;}).join('');
 }
 
+let _l2Erp='',_l2Mes='';
 function showL2(erp,mes){
+  _l2Erp=erp;_l2Mes=mes;
   document.getElementById('hist-l1').style.display='none';document.getElementById('hist-l2').style.display='block';
   document.getElementById('l2-title').textContent=`${erp} · ${fmtMes(mes)}`;
   const cases=getDB().filter(c=>c.erp===erp&&c.mes===mes);
   const tb=document.getElementById('l2-tbody');
-  tb.innerHTML=cases.map(c=>`<tr><td><span class="mono" style="color:var(--txt2)">${c.rut||'—'}</span></td><td style="min-width:160px">${esc(c.cliente||'—')}</td><td class="num">${c.mrr_clp?fmt(c.mrr_clp):'—'}</td><td class="num">${c.factura_clp?fmt(c.factura_clp):'—'}</td><td class="num ${c.diferencia_clp<0?'neg':c.diferencia_clp>0?'pos':''}">${c.diferencia_clp?fmt(c.diferencia_clp):'—'}</td><td style="font-size:12px;max-width:220px;word-break:break-word">${esc(c.tipo_caso||'—')}</td><td style="font-size:12px;color:var(--txt3)">${esc(c.explicacion||'—')}</td><td>${bEstado(c.estado)}</td><td style="font-size:11px;color:var(--txt3)">${c.fecha_registro||'—'}</td><td><button class="btn btn-danger btn-sm" onclick="if(confirm('¿Eliminar?')){delCase('${c.id}');renderHistorial()}">✕</button></td></tr>`).join('');
+  if(!cases.length){backHist();renderHistorial();return;}
+  tb.innerHTML=cases.map(c=>`<tr><td><span class="mono" style="color:var(--txt2)">${c.rut||'—'}</span></td><td style="min-width:160px">${esc(c.cliente||'—')}</td><td class="num">${c.mrr_clp?fmt(c.mrr_clp):'—'}</td><td class="num">${c.factura_clp?fmt(c.factura_clp):'—'}</td><td class="num ${c.diferencia_clp<0?'neg':c.diferencia_clp>0?'pos':''}">${c.diferencia_clp?fmt(c.diferencia_clp):'—'}</td><td style="font-size:12px;max-width:220px;word-break:break-word">${esc(c.tipo_caso||'—')}</td><td style="font-size:12px;color:var(--txt3)">${esc(c.explicacion||'—')}</td><td>${bEstado(c.estado)}</td><td style="font-size:11px;color:var(--txt3)">${c.fecha_registro||'—'}</td><td><button class="btn btn-danger btn-sm" onclick="delL2('${c.id}')">✕</button></td></tr>`).join('');
 }
+function delL2(id){if(!confirm('¿Eliminar este caso?'))return;delCase(id);showL2(_l2Erp,_l2Mes);}
 function backHist(){document.getElementById('hist-l1').style.display='block';document.getElementById('hist-l2').style.display='none';}
 
 /* ── EXPORT ── */
@@ -850,7 +1004,7 @@ function bEstado(e){if(e==='explicado')return '<span class="badge b-grn">Explica
 function toast(msg,type='info'){const t=document.getElementById('toast');const icons={success:'✓',error:'✕',info:'ℹ'};const colors={success:'var(--grn)',error:'var(--red)',info:'var(--acc2)'};t.innerHTML=`<span style="color:${colors[type]};font-weight:700">${icons[type]}</span>${msg}`;t.className='toast show '+(type==='success'?'success':type==='error'?'error':'');clearTimeout(t._to);t._to=setTimeout(()=>t.className='toast',3200);}
 
 /* ── IA INLINE CLASSIFIER ── */
-const AI_SYS=`Eres experto en clasificar casos de facturación ERP chileno. Clasifica en UNO de estos tipos:\n1. Cliente suspendido en plataforma\n2. Factura no emitida — sin orden de compra del cliente\n3. Cliente con calendario especial de cobro (ej: colegios, 10 meses)\n4. Facturación pausada por decisión comercial (renovación, negociación, desarrollo)\n5. Desfase en sistema de contratos — fecha real vs sistema\n6. Nota de crédito por ajuste de downselling\n7. Exceso facturado por ajuste de upselling\n8. Error de facturación u operativo\n9. Cliente paga sin factura emitida en el período\n10. Cliente con factura impaga — sin suspensión\n11. Implementación no completada\n12. Cliente rechazó factura o condiciones contractuales\n13. Cliente cancela antes de fecha de término contractual\n14. Descuento aplicado sobre tarifa contractual\n15. Upselling acordado aún no reflejado en facturación\n16. Downselling acordado aún no reflejado en facturación\n17. Facturación de más de un mes emitida en un mismo período\n18. Facturación mixta (anual + anticipado)\n19. Facturación semestral\n20. Facturación anual\nResponde SOLO con JSON: {"tipo":"nombre exacto","comentario":"máx 12 palabras"}`;
+const AI_SYS=`Eres experto en clasificar casos de facturación ERP chileno. Clasifica en UNO de estos tipos:\n1. Cliente suspendido en plataforma\n2. Factura no emitida — sin orden de compra del cliente\n3. Cliente con calendario especial de cobro (ej: colegios, 10 meses)\n4. Facturación pausada por decisión comercial (renovación, negociación, desarrollo)\n5. Desfase en sistema de contratos — fecha real vs sistema\n6. Nota de crédito por ajuste de downselling\n7. Exceso facturado por ajuste de upselling\n8. Error de facturación u operativo\n9. Cliente paga sin factura emitida en el período\n10. Cliente con factura impaga — sin suspensión\n11. Implementación no completada\n12. Cliente rechazó factura o condiciones contractuales\n13. Cliente cancela antes de fecha de término contractual\n14. Descuento aplicado sobre tarifa contractual\n15. Upselling acordado aún no reflejado en facturación\n16. Downselling acordado aún no reflejado en facturación\n17. Facturación de más de un mes emitida en un mismo período\n18. Facturación mixta (anual + anticipado)\n19. Facturación semestral\n20. Facturación anual\n21. Diferencia explicada por contratos comprometidos/ingresados (C/I)\n22. Pago anticipado detectado en período anterior (no registrado en archivo de anticipados)\nResponde SOLO con JSON: {"tipo":"nombre exacto","comentario":"máx 12 palabras"}`;
 
 let _aiResults={};
 
@@ -861,6 +1015,26 @@ function aplicarDcto(i,ev){
   document.getElementById('as-'+i).value='Descuento aplicado sobre tarifa contractual';
   document.getElementById('at-'+i).value=`Descuento del ${c.dctoInfo.currentPct}% sobre valor contractual (${fmt(c.dctoInfo.mrrOrig)} → ${fmt(c.dctoInfo.factReal)}), consistente con últimos ${c.dctoInfo.nMeses} meses.`;
   toast('Descuento aplicado — revisa y guarda','success');
+}
+
+function aplicarCI(i,ev){
+  ev.stopPropagation();const c=currentCasos[i];if(!c.ciExplain)return;
+  const af=document.getElementById('af-'+i);const cr=document.getElementById('cr-'+i);
+  if(!af.classList.contains('open')){document.querySelectorAll('.ann-wrap').forEach(e=>e.classList.remove('open'));document.querySelectorAll('#rev-tbody tr[id^="cr-"]').forEach(e=>e.classList.remove('sel'));af.classList.add('open');cr.classList.add('sel');}
+  document.getElementById('as-'+i).value='Diferencia explicada por contratos comprometidos/ingresados (C/I)';
+  const estados=[...new Set(c.ciExplain.detail.map(d=>d.estado))].join('/');
+  document.getElementById('at-'+i).value=`${c.ciExplain.lines} contrato(s) en estado ${estados} incluidos en MRR pero aún no facturados — impacto estimado ${fmt(c.ciExplain.total)} CLP.`;
+  toast('Clasificación C/I aplicada — revisa y guarda','success');
+}
+
+function aplicarAnticipo(i,ev){
+  ev.stopPropagation();const c=currentCasos[i];if(!c.anticipoMRR)return;
+  const af=document.getElementById('af-'+i);const cr=document.getElementById('cr-'+i);
+  if(!af.classList.contains('open')){document.querySelectorAll('.ann-wrap').forEach(e=>e.classList.remove('open'));document.querySelectorAll('#rev-tbody tr[id^="cr-"]').forEach(e=>e.classList.remove('sel'));af.classList.add('open');cr.classList.add('sel');}
+  document.getElementById('as-'+i).value='Pago anticipado detectado en período anterior (no registrado en archivo de anticipados)';
+  const a=c.anticipoMRR;
+  document.getElementById('at-'+i).value=`Cliente pagó ${fmt(a.montoPago)} en ${fmtMes(a.mesPago)} (${a.nMeses} meses, equivale a ~${fmt(a.mensual)}/mes). Vigente hasta ${fmtMes(a.mesFin)}. Pago no registrado en archivo de anticipados.`;
+  toast('Pago anticipado aplicado — revisa y guarda','success');
 }
 
 async function aiSugerir(i,ev){
