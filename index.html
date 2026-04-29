@@ -174,6 +174,31 @@ table.dt tbody tr.sel td{background:var(--acc3)}
   .login-title{font-size:18px}
   .breadcrumb{font-size:12px;flex-wrap:wrap}
 }
+@media (max-width:768px){
+  /* Tabla de casos detectados → tarjetas apiladas */
+  #rev-tbody tr.case-row{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:14px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--rad-lg);margin-bottom:10px;box-shadow:var(--shadow-sm)}
+  #rev-tbody tr.case-row:hover td{background:transparent}
+  #rev-tbody tr.case-row.sel{border-color:var(--acc);background:var(--acc4)}
+  #rev-tbody tr.case-row td{display:block;padding:0;border:none;background:transparent !important}
+  #rev-tbody tr.case-row td::before{content:attr(data-label);display:block;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--txt3);text-transform:uppercase;margin-bottom:2px}
+  #rev-tbody tr.case-row td.cell-cliente{grid-column:1/-1;font-weight:700;font-size:14px}
+  #rev-tbody tr.case-row td:first-child{grid-column:1/-1;font-size:11px;opacity:.85}
+  #rev-tbody tr.case-row td:first-child::before{display:inline;margin-right:6px}
+  #rev-tbody tr.case-row td.cell-diff,
+  #rev-tbody tr.case-row td.cell-pct{font-size:15px;font-weight:700;text-align:left}
+  #rev-tbody tr.case-row td[data-label="Explicación anterior"]{grid-column:1/-1;border-top:1px dashed var(--bd);padding-top:8px;margin-top:4px}
+  #rev-tbody tr.case-row td.cell-actions{grid-column:1/-1;text-align:left}
+  #rev-tbody tr.case-row td.cell-actions::before{display:none}
+  #rev-tbody tr.case-row td.num{text-align:left}
+  #rev-tbody .ann-wrap{display:none}
+  #rev-tbody .ann-wrap.open{display:block;margin:-8px 0 12px;border-radius:0 0 var(--rad-lg) var(--rad-lg)}
+  #rev-tbody .ann-wrap td{display:block;padding:0;border:none}
+  #rev-tbody .ann-wrap td::before{display:none}
+  /* Quitar wrapper de tabla en móvil para que las cards usen ancho completo */
+  #rev-results .table-wrap{border:none;background:transparent;box-shadow:none;overflow:visible}
+  #rev-results table.dt thead{display:none}
+  #rev-results table.dt,#rev-results table.dt tbody{display:block;width:100%}
+}
 @media (max-width:480px){
   .logo img{height:26px !important}
   .tab-btn{padding:10px 8px;font-size:11px;gap:4px}
@@ -878,18 +903,18 @@ function renderRevision(casos,erp,mes){
   const tb=document.getElementById('rev-tbody');
   if(!casos.length){tb.innerHTML=`<tr><td colspan="11"><div class="empty"><div class="empty-icon">✓</div><div class="empty-title" style="color:var(--grn)">Sin casos anómalos</div></div></td></tr>`;return;}
   tb.innerHTML=casos.map((c,i)=>`
-    <tr id="cr-${i}" onclick="toggleAnn(${i})" style="cursor:pointer">
-      <td><span class="mono" style="color:var(--txt2);white-space:nowrap">${c.rutVal}</span></td>
-      <td style="min-width:160px;word-break:break-word">${esc(c.cliVal)}</td>
-      <td class="num">${fmt(c.mrr)}</td>
-      <td class="num ${c.fact===0?'muted':''}">${c.fact===0?'—':fmt(c.fact)}</td>
-      <td class="num ${c.cobrado?'':'muted'}">${c.cobrado?'<span style="color:var(--grn)">'+fmt(c.cobrado)+'</span>':'—'}</td>
-      <td class="num ${c.reconocido?'':'muted'}">${c.reconocido?'<span style="color:var(--grn)">'+fmt(c.reconocido)+'</span>':'—'}</td>
-      <td class="num" style="font-weight:600">${fmt(c.ingresoEfectivo)}</td>
-      <td class="num ${c.diffAjustada<0?'neg':c.diffAjustada>0?'pos':''}">${fmt(c.diffAjustada)}</td>
-      <td class="num ${c.diffAjustada<0?'neg':c.diffAjustada>0?'pos':''}">${c.mrr?((c.diffAjustada/c.mrr*100).toFixed(1)+'%'):'—'}</td>
-      <td style="max-width:440px;font-size:11px;word-break:break-word">${c.expAnterior?'<div style="color:var(--acc);font-weight:600">'+esc(c.expAnterior)+'</div>'+(c.expAnteriorDetallada?'<div style="color:var(--txt3);margin-top:2px">'+esc(c.expAnteriorDetallada)+'</div>':''):'<span style="opacity:.4">Sin historial</span>'}</td>
-      <td style="white-space:nowrap;text-align:right">
+    <tr id="cr-${i}" onclick="toggleAnn(${i})" style="cursor:pointer" class="case-row">
+      <td data-label="RUT"><span class="mono" style="color:var(--txt2);white-space:nowrap">${c.rutVal}</span></td>
+      <td data-label="Cliente" class="cell-cliente" style="min-width:160px;word-break:break-word">${esc(c.cliVal)}</td>
+      <td data-label="MRR" class="num">${fmt(c.mrr)}</td>
+      <td data-label="Factura" class="num ${c.fact===0?'muted':''}">${c.fact===0?'—':fmt(c.fact)}</td>
+      <td data-label="Cobrado mes" class="num ${c.cobrado?'':'muted'}">${c.cobrado?'<span style="color:var(--grn)">'+fmt(c.cobrado)+'</span>':'—'}</td>
+      <td data-label="Reconocido mes" class="num ${c.reconocido?'':'muted'}">${c.reconocido?'<span style="color:var(--grn)">'+fmt(c.reconocido)+'</span>':'—'}</td>
+      <td data-label="Ingreso efectivo" class="num" style="font-weight:600">${fmt(c.ingresoEfectivo)}</td>
+      <td data-label="Dif. ajustada" class="num cell-diff ${c.diffAjustada<0?'neg':c.diffAjustada>0?'pos':''}">${fmt(c.diffAjustada)}</td>
+      <td data-label="% MRR" class="num cell-pct ${c.diffAjustada<0?'neg':c.diffAjustada>0?'pos':''}">${c.mrr?((c.diffAjustada/c.mrr*100).toFixed(1)+'%'):'—'}</td>
+      <td data-label="Explicación anterior" style="max-width:440px;font-size:11px;word-break:break-word">${c.expAnterior?'<div style="color:var(--acc);font-weight:600">'+esc(c.expAnterior)+'</div>'+(c.expAnteriorDetallada?'<div style="color:var(--txt3);margin-top:2px">'+esc(c.expAnteriorDetallada)+'</div>':''):'<span style="opacity:.4">Sin historial</span>'}</td>
+      <td class="cell-actions" style="white-space:nowrap;text-align:right">
         ${c.dctoInfo?`<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-bottom:5px;display:block;width:100%;border-color:var(--amb);color:var(--amb)" onclick="aplicarDcto(${i},event)">⚡ Dcto ~${c.dctoInfo.pct}%</button>`:''}
         ${c.ciExplain&&(Math.abs(c.ciExplain.total)/Math.abs(c.diffAjustada||1))>=0.15?`<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-bottom:5px;display:block;width:100%;border-color:var(--grn);color:var(--grn)" onclick="aplicarCI(${i},event)">📋 Contrato C/I (~${fmt(c.ciExplain.total)})</button>`:''}
         ${c.anticipoMRR?`<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-bottom:5px;display:block;width:100%;border-color:var(--acc2);color:var(--acc2)" onclick="aplicarAnticipo(${i},event)">💰 Pago anticipado ${fmtMes(c.anticipoMRR.mesPago)} (${c.anticipoMRR.nMeses}x MRR)</button>`:''}
